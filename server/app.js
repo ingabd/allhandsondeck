@@ -5,6 +5,8 @@ if (process.env.NODE_ENV !== 'production') {
 const express = require('express')
 const cors = require('cors')
 const { connect } = require('./config/mongoConnection')
+const { createServer } = require("http")
+const { Server } = require("socket.io")
 // const router = require('./routes')
 // const errorHandler = require('./middlewares/errorHandler')
 
@@ -26,10 +28,36 @@ app.get('/', (req, res) => {
 // app.use(router)
 // app.use(errorHandler)
 
+const httpServer = createServer(app)
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:8080",
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  allowEIO3: true
+})
+
+io.on("connection", (socket) => {
+  console.log(socket.id)
+  socket.on('chat', (data) => {
+    socket.broadcast.emit('chat', data)
+  })
+  // socket.on('draw', function (data) {
+  //   socket.broadcast.emit('draw', data)
+  // })
+  // socket.on('mouseDown', function () {
+  //   socket.broadcast.emit('mouseDown')
+  // })
+  // socket.on('reset', function () {
+  //   socket.broadcast.emit('reset')
+  // })
+})
+
 connect()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`App berjalan di ${PORT}`)
+    httpServer.listen(PORT, () => {
+      console.log('Allhandsondeck runninng on port:', PORT)
     })
   })
   .catch(err => {
