@@ -4,11 +4,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 const express = require('express')
 const cors = require('cors')
+const { connect } = require('./config/mongoConnection')
 // const router = require('./routes')
 // const errorHandler = require('./middlewares/errorHandler')
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = Number(process.env.PORT) || 3000
 
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
@@ -25,6 +26,13 @@ app.get('/', (req, res) => {
 // app.use(router)
 // app.use(errorHandler)
 
-app.listen(PORT, () => {
-  console.log(`App berjalan di ${PORT}`)
-})
+connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`App berjalan di ${PORT}`)
+    })
+  })
+  .catch(err => {
+  console.log(err)
+  })
+
